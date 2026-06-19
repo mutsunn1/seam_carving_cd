@@ -1,0 +1,24 @@
+# Build output
+build/
+out/
+*.exe
+*.obj
+*.pdb
+*.ilk
+
+# IDE
+.vs/
+*.sln
+*.vcxproj*
+.idea/
+.vscode/
+
+# Generated outputs
+output/*
+!output/.gitkeep
+
+# OS
+Thumbs.db
+.DS_Store
+
+sample.jpg
