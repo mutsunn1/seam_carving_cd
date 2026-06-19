@@ -27,18 +27,19 @@ cv::Mat insert_vertical_seam(const cv::Mat& image, const std::vector<int>& seam)
 cv::Mat shrink_width(const cv::Mat& image, int target_width);
 cv::Mat expand_width(const cv::Mat& image, int target_width);
 
-// 演示结果
-struct DemoResult {
-    cv::Mat original;
-    cv::Mat energy;
-    cv::Mat seam_overlay;
-    cv::Mat resized;
+// 前端动画演示：把缩图/扩图过程拆成一帧帧
+struct AnimationFrame {
+    cv::Mat image;         // 当前步骤图像
+    cv::Mat energy;        // 能量图可视化
+    cv::Mat seam_overlay;  // 标红 seam 的图像
 };
+using Animation = std::vector<AnimationFrame>;
 
-// 执行一次 seam carving 演示流程
-DemoResult run_demo(const cv::Mat& image, int target_width);
+// 生成缩图/扩图过程的逐帧动画
+Animation animate_shrink(const cv::Mat& image, int target_width);
+Animation animate_expand(const cv::Mat& image, int target_width);
 
-// 保存演示结果到目录，并生成 index.html
-void save_demo_outputs(const DemoResult& result, const std::string& output_dir);
+// 同时保存缩图和扩图动画，并生成带切换按钮的 animation.html
+void save_animations(const Animation& shrink, const Animation& expand, const std::string& output_dir);
 
 } // namespace seam_carving

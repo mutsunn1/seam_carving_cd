@@ -72,7 +72,20 @@ run_tests.bat
 run_demo.bat data\sample.jpg output --width 120
 ```
 
-会在 `output/` 目录生成 `original.png`、`energy.png`、`seam_overlay.png`、`resized.png`、`index.html`（占位代码下可能为空或不全）。
+会在 `output/` 目录生成前端动画：
+
+- `animation.html`
+- `frames/shrink/*.png`
+- `frames/expand/*.png`
+
+用浏览器打开 `output/animation.html` 可以播放/拖动查看 seam carving 每一步的变化。
+
+动画说明：
+
+- 页面顶部有 **“缩图 / 扩图”** 切换按钮，可同时观看两种操作。
+- **缩图**：红色粗线标记当前帧即将删除的 seam，下一帧图像宽度减 1。
+- **扩图**：绿色粗线标记当前帧刚插入的 seam，可以清楚看到图像宽度逐步增加。
+- 无论命令行 `--width` 是缩图还是扩图，动画页面都会同时生成两边的过程。
 
 ## 模块分工
 

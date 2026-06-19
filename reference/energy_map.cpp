@@ -22,4 +22,4 @@ cv::Mat compute_energy_map(const cv::Mat& image) {
     return energy;
 }
 
-} // namespace seam_carving
+} 

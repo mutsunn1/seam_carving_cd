@@ -4,6 +4,12 @@ project(seam_carving_cpp LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# MSVC 默认使用系统代码页读取源文件；项目注释和字符串使用 UTF-8，
+# 因此需要显式指定 /utf-8，否则中文注释可能被误解析为语法错误。
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 # OpenCV 是硬依赖。运行前请设置环境变量 OPENCV_DIR，
 # 指向包含 OpenCVConfig.cmake 的目录，例如：
 #   set OPENCV_DIR=C:\opencv\build\x64\vc16\lib

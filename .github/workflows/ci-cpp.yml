@@ -54,8 +54,5 @@ jobs:
         with:
           name: demo-outputs
           path: |
-            output/original.png
-            output/energy.png
-            output/seam_overlay.png
-            output/resized.png
-            output/index.html
+            output/animation.html
+            output/frames/**/*.png

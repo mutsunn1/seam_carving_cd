@@ -2,10 +2,11 @@
 
 namespace seam_carving {
 
-// 缩图：循环删除 seam 直到达到目标宽度
+// 反复删除 seam，直到图像宽度等于 target_width
 cv::Mat shrink_width(const cv::Mat& image, int target_width) {
     cv::Mat result = image.clone();
     while (result.cols > target_width) {
+        // 每轮：算能量 -> 找 seam -> 删除 seam
         cv::Mat energy = compute_energy_map(result);
         std::vector<int> seam = find_vertical_seam(energy);
         result = remove_vertical_seam(result, seam);
@@ -13,10 +14,11 @@ cv::Mat shrink_width(const cv::Mat& image, int target_width) {
     return result;
 }
 
-// 扩图：循环插入 seam 直到达到目标宽度
+// 反复插入 seam，直到图像宽度等于 target_width
 cv::Mat expand_width(const cv::Mat& image, int target_width) {
     cv::Mat result = image.clone();
     while (result.cols < target_width) {
+        // 每轮：算能量 -> 找 seam -> 插入 seam
         cv::Mat energy = compute_energy_map(result);
         std::vector<int> seam = find_vertical_seam(energy);
         result = insert_vertical_seam(result, seam);
