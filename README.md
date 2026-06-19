@@ -1,6 +1,5 @@
-# Seam Carving C++/MSVC 子项目
+# Seam Carving C++/MSVC 
 
-本科算法分析课设的 C++/MSVC 实现，与 Python 版本（`seam_carving_cd/`）并存。
 
 ## 目录结构
 
