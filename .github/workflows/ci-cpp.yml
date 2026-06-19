@@ -1,0 +1,61 @@
+name: C++/MSVC Seam Carving
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    env:
+      OPENCV_VERSION: 4.8.1
+      OPENCV_INSTALL_DIR: C:\tools\opencv
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install OpenCV
+        shell: pwsh
+        run: |
+          $installer = "opencv-${{ env.OPENCV_VERSION }}-windows.exe"
+          $url = "https://github.com/opencv/opencv/releases/download/${{ env.OPENCV_VERSION }}/$installer"
+          Invoke-WebRequest -Uri $url -OutFile $installer
+          New-Item -ItemType Directory -Force -Path ${{ env.OPENCV_INSTALL_DIR }} | Out-Null
+          Start-Process -FilePath ".\$installer" -ArgumentList "-o${{ env.OPENCV_INSTALL_DIR }}", "-y" -Wait
+          $env:OPENCV_DIR = "${{ env.OPENCV_INSTALL_DIR }}\opencv\build\x64\vc16\lib"
+          "OPENCV_DIR=$env:OPENCV_DIR" >> $env:GITHUB_ENV
+          "$env:OPENCV_DIR\..\bin" >> $env:GITHUB_PATH
+
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          cmake -S . -B build `
+            -G "Visual Studio 17 2022" -A x64 `
+            -DOpenCV_DIR="$env:OPENCV_DIR"
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config Release
+
+      - name: Run tests
+        shell: pwsh
+        run: build/Release/seam_carving_tests.exe
+
+      - name: Run demo
+        shell: pwsh
+        run: build/Release/seam_carving_demo.exe data/sample.jpg output --width 120
+
+      - name: Upload demo outputs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: demo-outputs
+          path: |
+            output/original.png
+            output/energy.png
+            output/seam_overlay.png
+            output/resized.png
+            output/index.html
