@@ -112,3 +112,5 @@ run_demo.bat data\sample.jpg output --width 120
 - 其他同学还没实现时，CI 也能通过（因为占位代码满足契约测试）。
 - 想本地看真实效果，手动运行 `use_reference.bat`。
 
+test
+
