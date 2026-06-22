@@ -13,5 +13,5 @@ std::vector<int> find_vertical_seam(const cv::Mat& energy) {
     int mid = std::max(0, w / 2);
     return std::vector<int>(h, mid);
 }
-
+1111
 } // namespace seam_carving
