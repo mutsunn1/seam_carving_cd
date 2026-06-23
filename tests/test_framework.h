@@ -26,9 +26,19 @@ struct TestRunner {
     }
 
     static int run_all() {
+        return run_with_prefix("");
+    }
+
+    // 只运行名字以 prefix 开头（prefix 为空则运行全部）的测试用例
+    static int run_with_prefix(const std::string& prefix) {
         int passed = 0;
         int failed = 0;
+        int skipped = 0;
         for (const auto& t : tests()) {
+            if (!prefix.empty() && t.name.rfind(prefix, 0) != 0) {
+                ++skipped;
+                continue;
+            }
             try {
                 t.func();
                 std::cout << "[PASS] " << t.name << "\n";
@@ -38,7 +48,11 @@ struct TestRunner {
                 ++failed;
             }
         }
-        std::cout << "\n" << passed << " passed, " << failed << " failed\n";
+        std::cout << "\n" << passed << " passed, " << failed << " failed";
+        if (skipped > 0) {
+            std::cout << ", " << skipped << " skipped by prefix '" << prefix << "'";
+        }
+        std::cout << "\n";
         return failed == 0 ? 0 : 1;
     }
 };

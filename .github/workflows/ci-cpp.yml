@@ -40,9 +40,29 @@ jobs:
         shell: pwsh
         run: cmake --build build --config Release
 
-      - name: Run tests
+      - name: Test energy_map
         shell: pwsh
-        run: build/Release/seam_carving_tests.exe
+        run: build/Release/seam_carving_tests.exe energy_map
+
+      - name: Test dp_search
+        shell: pwsh
+        run: build/Release/seam_carving_tests.exe dp_search
+
+      - name: Test seam_remove
+        shell: pwsh
+        run: build/Release/seam_carving_tests.exe seam_remove
+
+      - name: Test seam_insert
+        shell: pwsh
+        run: build/Release/seam_carving_tests.exe seam_insert
+
+      - name: Test resize
+        shell: pwsh
+        run: build/Release/seam_carving_tests.exe resize
+
+      - name: Test demo
+        shell: pwsh
+        run: build/Release/seam_carving_tests.exe demo
 
       - name: Run demo
         shell: pwsh

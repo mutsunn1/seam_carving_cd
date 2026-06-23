@@ -10,6 +10,18 @@
 - `reference/` 里的同名 `.cpp` 文件是可直接复制到 `src/` 的参考实现。
 - 测试是**契约测试**：只验证接口与基础不变量，占位代码和参考实现都应通过。
 - CI 直接构建 `src/` 中的当前代码，不自动复制 `reference/`。
+- **CI 按模块分 step 运行测试**，失败时 step 名称即对应模块，再由下表映射到人。
+
+## 人员分工
+
+| 模块 | 负责文件 | 同学 |
+|------|----------|------|
+| energy_map | `src/energy_map.cpp` | 第一位 |
+| dp_search | `src/dp_search.cpp` | 第二位 |
+| seam_remove | `src/seam_remove.cpp` | 第三位 |
+| seam_insert | `src/seam_insert.cpp` | 第四位 |
+| demo | `src/demo.cpp` | 第四位 |
+| resize | `src/resize.cpp` | 已实现，不对应个人 |
 
 ## 通用约定
 
@@ -23,12 +35,32 @@
 
 | 模块 | 契约 | 占位代码应满足 |
 |------|------|----------------|
-| 能量图 | 输出与输入同尺寸、单通道 CV_64F、能量非负 | 返回同尺寸全零图 |
-| DP 搜索 | seam 长度等于高度、列号合法、相邻差 ≤1 | 返回每行中间列 |
-| 删除 seam | 输出高度不变、宽度减 1、类型不变 | 裁剪最右一列 |
-| 插入 seam | 输出高度不变、宽度加 1、类型不变 | 返回宽度加 1 的黑图 |
+| energy_map | 输出与输入同尺寸、单通道 CV_64F、能量非负 | 返回同尺寸全 1 图 |
+| dp_search | seam 长度等于高度、列号合法、相邻差 ≤1 | 返回每行中间列 |
+| seam_remove | 输出高度不变、宽度减 1、类型不变 | 裁剪最右一列 |
+| seam_insert | 输出高度不变、宽度加 1、类型不变 | 右侧复制一列 |
 | resize | 最终宽度达到目标值、高度和类型不变 | 依赖删除/插入 seam |
-| demo | 结果图达到目标宽度 | 调用 shrink/expand |
+| demo | 动画帧数正确、seam 标记可见、HTML 切换按钮存在 | 占位能量/占位 seam |
+
+## 测试命名约定
+
+所有测试用例名统一为 `<模块>_<描述>`，例如：
+
+- `energy_map_has_correct_size_and_type`
+- `dp_search_returns_valid_columns`
+- `resize_shrink_width_reaches_target`
+- `demo_animate_shrink_frame_count`
+
+CI 通过前缀过滤只运行对应模块的用例：
+
+```cmd
+build/Release/seam_carving_tests.exe energy_map
+build/Release/seam_carving_tests.exe dp_search
+build/Release/seam_carving_tests.exe seam_remove
+build/Release/seam_carving_tests.exe seam_insert
+build/Release/seam_carving_tests.exe resize
+build/Release/seam_carving_tests.exe demo
+```
 
 ## 第一位同学：能量图
 
@@ -93,19 +125,23 @@ cv::Mat insert_vertical_seam(const cv::Mat& image, const std::vector<int>& seam)
 
 ### 简单前端演示
 
+接口：
+
 ```cpp
-DemoResult run_demo(const cv::Mat& image, int target_width);
-void save_demo_outputs(const DemoResult& result, const std::string& output_dir);
+Animation animate_shrink(const cv::Mat& image, int target_width);
+Animation animate_expand(const cv::Mat& image, int target_width);
+void save_animations(const Animation& shrink, const Animation& expand, const std::string& output_dir);
 ```
 
-- `run_demo`：调用 `shrink_width` 或 `expand_width`，返回原图、能量图、seam 覆盖图、结果图。
-- `save_demo_outputs`：把四张图片保存到目录，并生成 `index.html`。
-- 契约：`result.resized` 的宽度必须等于 `target_width`。
+- `animate_shrink` / `animate_expand`：生成缩图/扩图过程的逐帧动画。
+- `save_animations`：保存动画帧到 `frames/shrink/` 和 `frames/expand/`，并生成带“缩图/扩图”切换按钮的 `animation.html`。
+- 契约：动画帧数正确、seam 标记颜色可见（缩图红色、扩图绿色）、HTML 包含切换按钮。
 - 参考：`reference/demo.cpp`
 
 ## 完整验证
 
 ```cmd
-run_tests.bat
+run_tests.bat                 :: 运行全部测试
+run_tests.bat Release energy_map :: 只运行 energy_map 模块测试
 run_demo.bat data\sample.jpg output --width 120
 ```

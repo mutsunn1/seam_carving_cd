@@ -15,14 +15,14 @@ TEST(demo_uses_resize_to_target_width) {
 }
 
 // 契约测试：缩图动画的帧数等于宽度变化量 + 1
-TEST(animate_shrink_frame_count) {
+TEST(demo_animate_shrink_frame_count) {
     cv::Mat image = cv::Mat::ones(6, 8, CV_8UC3);
     auto animation = seam_carving::animate_shrink(image, 5);
     ASSERT_EQ(animation.size(), static_cast<size_t>(8 - 5 + 1));
 }
 
 // 契约测试：扩图动画的帧数等于宽度变化量 + 1
-TEST(animate_expand_frame_count) {
+TEST(demo_animate_expand_frame_count) {
     cv::Mat image = cv::Mat::ones(6, 5, CV_8UC3);
     auto animation = seam_carving::animate_expand(image, 8);
     ASSERT_EQ(animation.size(), static_cast<size_t>(8 - 5 + 1));
@@ -45,7 +45,7 @@ static int count_color_pixels(const cv::Mat& image, const cv::Vec3b& color, int 
 }
 
 // 契约测试：缩图动画中，除最后一帧外，seam_overlay 都包含红色标记
-TEST(animate_shrink_marks_seam_red) {
+TEST(demo_animate_shrink_marks_seam_red) {
     cv::Mat image = cv::Mat::ones(6, 8, CV_8UC3);
     auto animation = seam_carving::animate_shrink(image, 5);
     ASSERT_TRUE(animation.size() >= 2);
@@ -56,7 +56,7 @@ TEST(animate_shrink_marks_seam_red) {
 }
 
 // 契约测试：扩图动画中，除第一帧外，seam_overlay 都包含绿色插入标记
-TEST(animate_expand_marks_inserted_seam_green) {
+TEST(demo_animate_expand_marks_inserted_seam_green) {
     cv::Mat image = cv::Mat::ones(6, 5, CV_8UC3);
     auto animation = seam_carving::animate_expand(image, 8);
     ASSERT_TRUE(animation.size() >= 2);
@@ -67,7 +67,7 @@ TEST(animate_expand_marks_inserted_seam_green) {
 }
 
 // 契约测试：save_animations 同时生成缩图/扩图帧和带切换按钮的 HTML
-TEST(save_animations_creates_both_modes) {
+TEST(demo_save_animations_creates_both_modes) {
     namespace fs = std::filesystem;
     cv::Mat image = cv::Mat::ones(6, 8, CV_8UC3);
     auto shrink = seam_carving::animate_shrink(image, 6);
