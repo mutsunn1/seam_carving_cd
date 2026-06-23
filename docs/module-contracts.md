@@ -42,24 +42,26 @@
 | resize | 最终宽度达到目标值、高度和类型不变 | 依赖删除/插入 seam |
 | demo | 动画帧数正确、seam 标记可见、HTML 切换按钮存在 | 占位能量/占位 seam |
 
-## 测试命名约定
+## 测试可执行文件
 
-所有测试用例名统一为 `<模块>_<描述>`，例如：
+每个模块有独立的测试可执行文件，只链接该模块依赖的源文件。这样某个模块的符号缺失或链接失败不会导致其他模块的 CI job 失败。
 
-- `energy_map_has_correct_size_and_type`
-- `dp_search_returns_valid_columns`
-- `resize_shrink_width_reaches_target`
-- `demo_animate_shrink_frame_count`
+| 可执行文件 | 测试文件 | 依赖的源码 |
+|------------|----------|-----------|
+| `test_energy_map.exe` | `tests/test_energy_map.cpp` | `src/energy_map.cpp` |
+| `test_dp_search.exe` | `tests/test_dp_search.cpp` | `src/energy_map.cpp`, `src/dp_search.cpp` |
+| `test_seam_remove.exe` | `tests/test_seam_remove.cpp` | `src/seam_remove.cpp` |
+| `test_seam_insert.exe` | `tests/test_seam_insert.cpp` | `src/seam_insert.cpp` |
+| `test_resize.exe` | `tests/test_resize.cpp` | `src/energy_map.cpp`, `src/dp_search.cpp`, `src/seam_remove.cpp`, `src/seam_insert.cpp`, `src/resize.cpp` |
+| `test_demo.exe` | `tests/test_demo.cpp` | 所有模块 + `src/image_io.cpp`, `src/demo.cpp` |
+| `seam_carving_tests.exe` | 所有 `tests/test_*.cpp` | 所有 `src/*.cpp` |
 
-CI 通过前缀过滤只运行对应模块的用例：
+本地运行：
 
 ```cmd
-build/Release/seam_carving_tests.exe energy_map
-build/Release/seam_carving_tests.exe dp_search
-build/Release/seam_carving_tests.exe seam_remove
-build/Release/seam_carving_tests.exe seam_insert
-build/Release/seam_carving_tests.exe resize
-build/Release/seam_carving_tests.exe demo
+run_tests.bat Release energy_map   :: 只运行 energy_map 模块
+run_tests.bat Release dp_search    :: 只运行 dp_search 模块
+run_tests.bat Release              :: 运行全量测试
 ```
 
 ## 第一位同学：能量图

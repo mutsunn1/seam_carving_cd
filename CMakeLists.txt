@@ -19,8 +19,19 @@ endif()
 
 find_package(OpenCV REQUIRED)
 
-# 核心算法库
-add_library(seam_carving_lib STATIC
+# 公共包含目录和链接库
+set(SEAM_CARVING_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${OpenCV_INCLUDE_DIRS}
+)
+set(SEAM_CARVING_LIBS ${OpenCV_LIBS})
+
+# 命令行演示程序：链接所有模块
+add_executable(seam_carving_demo src/main.cpp)
+target_include_directories(seam_carving_demo PRIVATE ${SEAM_CARVING_INCLUDE_DIRS})
+target_link_libraries(seam_carving_demo PRIVATE ${SEAM_CARVING_LIBS})
+# 显式把每个模块源文件链接进 demo 可执行文件
+target_sources(seam_carving_demo PRIVATE
     src/image_io.cpp
     src/energy_map.cpp
     src/dp_search.cpp
@@ -30,20 +41,50 @@ add_library(seam_carving_lib STATIC
     src/demo.cpp
 )
 
-target_include_directories(seam_carving_lib PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${OpenCV_INCLUDE_DIRS}
+# 测试入口公共文件
+set(TEST_MAIN tests/test_main.cpp)
+
+# 每个模块独立的测试可执行文件：
+# 只链接该模块依赖的源文件，这样某个模块链接失败时不会影响其他模块的 job。
+function(add_module_test name src_files test_files)
+    add_executable(${name} ${TEST_MAIN} ${src_files} ${test_files})
+    target_include_directories(${name} PRIVATE ${SEAM_CARVING_INCLUDE_DIRS})
+    target_link_libraries(${name} PRIVATE ${SEAM_CARVING_LIBS})
+endfunction()
+
+add_module_test(test_energy_map
+    "src/energy_map.cpp"
+    "tests/test_energy_map.cpp"
 )
 
-target_link_libraries(seam_carving_lib PUBLIC ${OpenCV_LIBS})
+add_module_test(test_dp_search
+    "src/energy_map.cpp;src/dp_search.cpp"
+    "tests/test_dp_search.cpp"
+)
 
-# 命令行演示程序
-add_executable(seam_carving_demo src/main.cpp)
-target_link_libraries(seam_carving_demo PRIVATE seam_carving_lib)
+add_module_test(test_seam_remove
+    "src/seam_remove.cpp"
+    "tests/test_seam_remove.cpp"
+)
 
-# 测试程序
+add_module_test(test_seam_insert
+    "src/seam_insert.cpp"
+    "tests/test_seam_insert.cpp"
+)
+
+add_module_test(test_resize
+    "src/energy_map.cpp;src/dp_search.cpp;src/seam_remove.cpp;src/seam_insert.cpp;src/resize.cpp"
+    "tests/test_resize.cpp"
+)
+
+add_module_test(test_demo
+    "src/image_io.cpp;src/energy_map.cpp;src/dp_search.cpp;src/seam_remove.cpp;src/seam_insert.cpp;src/resize.cpp;src/demo.cpp"
+    "tests/test_demo.cpp"
+)
+
+# 全量测试：链接所有模块和所有测试文件
 add_executable(seam_carving_tests
-    tests/test_main.cpp
+    ${TEST_MAIN}
     tests/test_energy_map.cpp
     tests/test_dp_search.cpp
     tests/test_seam_remove.cpp
@@ -51,4 +92,14 @@ add_executable(seam_carving_tests
     tests/test_resize.cpp
     tests/test_demo.cpp
 )
-target_link_libraries(seam_carving_tests PRIVATE seam_carving_lib)
+target_include_directories(seam_carving_tests PRIVATE ${SEAM_CARVING_INCLUDE_DIRS})
+target_link_libraries(seam_carving_tests PRIVATE ${SEAM_CARVING_LIBS})
+target_sources(seam_carving_tests PRIVATE
+    src/image_io.cpp
+    src/energy_map.cpp
+    src/dp_search.cpp
+    src/seam_remove.cpp
+    src/seam_insert.cpp
+    src/resize.cpp
+    src/demo.cpp
+)
