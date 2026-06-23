@@ -7,8 +7,13 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  module-test:
+    name: Test ${{ matrix.module }}
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [energy_map, dp_search, seam_remove, seam_insert, resize, demo]
     env:
       OPENCV_VERSION: 4.8.1
       OPENCV_INSTALL_DIR: C:\tools\opencv
@@ -40,37 +45,18 @@ jobs:
         shell: pwsh
         run: cmake --build build --config Release
 
-      - name: Test energy_map
+      - name: Test ${{ matrix.module }}
         shell: pwsh
-        run: build/Release/seam_carving_tests.exe energy_map
-
-      - name: Test dp_search
-        shell: pwsh
-        run: build/Release/seam_carving_tests.exe dp_search
-
-      - name: Test seam_remove
-        shell: pwsh
-        run: build/Release/seam_carving_tests.exe seam_remove
-
-      - name: Test seam_insert
-        shell: pwsh
-        run: build/Release/seam_carving_tests.exe seam_insert
-
-      - name: Test resize
-        shell: pwsh
-        run: build/Release/seam_carving_tests.exe resize
-
-      - name: Test demo
-        shell: pwsh
-        run: build/Release/seam_carving_tests.exe demo
+        run: build/Release/seam_carving_tests.exe ${{ matrix.module }}
 
       - name: Run demo
+        if: matrix.module == 'demo'
         shell: pwsh
         run: build/Release/seam_carving_demo.exe data/sample.jpg output --width 120
 
       - name: Upload demo outputs
         uses: actions/upload-artifact@v4
-        if: always()
+        if: matrix.module == 'demo' && always()
         with:
           name: demo-outputs
           path: |
