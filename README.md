@@ -9,7 +9,6 @@ seam_carving_cpp/
 ├── build_msvc.bat          # MSVC 一键构建
 ├── run_tests.bat           # 运行测试
 ├── run_demo.bat            # 运行演示
-├── use_reference.bat       # 复制参考实现到 src/
 ├── src/
 │   ├── seam_carving.h      # 所有接口声明（唯一头文件）
 │   ├── image_io.cpp        # 图片读写（已实现）
@@ -20,7 +19,6 @@ seam_carving_cpp/
 │   ├── resize.cpp          # 缩图 / 扩图（已实现）
 │   ├── demo.cpp            # 演示输出（占位，第四位实现）
 │   └── main.cpp            # 命令行入口（已实现）
-├── reference/              # 完整参考实现 .cpp，可直接复制到 src/
 ├── tests/                  # 契约测试
 ├── data/                   # 示例图片
 └── output/                 # 演示输出
@@ -29,13 +27,12 @@ seam_carving_cpp/
 ## 协作方式
 
 1. 所有接口都在 `src/seam_carving.h` 中声明，每个同学只需修改自己负责的 `.cpp` 文件。
-2. `reference/` 里有完整可运行的参考实现，直接复制到 `src/` 同名文件即可看到正确效果。
-3. 测试是**契约测试**：只检查尺寸、类型、范围、相邻约束等基础不变量。**占位代码和参考实现都应通过测试**，这样任何一位同学未开始实现时，CI 也能通过，方便单独验证自己的模块。
-4. 想一次性用全部参考实现跑通：
+2. 测试是**契约测试**：只检查尺寸、类型、范围、相邻约束等基础不变量。**占位代码和参考实现都应通过测试**，这样任何一位同学未开始实现时，CI 也能通过，方便单独验证自己的模块。
+3. 想一次性用全部参考实现跑通：
 
-   ```cmd
-   use_reference.bat
-   build_msvc.bat
+   ```powershell
+   .\use_reference.bat
+   .\build_msvc.bat
    ```
 
 ## 前置要求
@@ -48,28 +45,32 @@ seam_carving_cpp/
 
 构建前设置环境变量 `OPENCV_DIR`，指向包含 `OpenCVConfig.cmake` 的目录：
 
-```cmd
-set OPENCV_DIR=C:\opencv\build\x64\vc16\lib
+```powershell
+$env:OPENCV_DIR = "C:\opencv\build\x64\vc16\lib"
 ```
 
-运行前把 OpenCV 的 `build\x64\vc16\bin` 加入 `PATH`。
+运行前把 OpenCV 的 `build\x64\vc16\bin` 加入 `PATH`：
+
+```powershell
+$env:PATH = "C:\opencv\build\x64\vc16\bin;" + $env:PATH
+```
 
 ## 构建
 
-```cmd
-build_msvc.bat
+```powershell
+.\build_msvc.bat
 ```
 
 ## 运行测试
 
-```cmd
-run_tests.bat
+```powershell
+.\run_tests.bat
 ```
 
 ## 运行演示
 
-```cmd
-run_demo.bat data\sample.jpg output --width 120
+```powershell
+.\run_demo.bat data\sample.jpg output --width 120
 ```
 
 会在 `output/` 目录生成前端动画：
@@ -110,7 +111,6 @@ run_demo.bat data\sample.jpg output --width 120
 
 - 任何同学 push 自己负责的文件，CI 都能跑。
 - 其他同学还没实现时，CI 也能通过（因为占位代码满足契约测试）。
-- 想本地看真实效果，手动运行 `use_reference.bat`。
 
 test
 test

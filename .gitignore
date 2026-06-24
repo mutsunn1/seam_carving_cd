@@ -17,6 +17,13 @@ out/
 output/*
 !output/.gitkeep
 
+# Presentation materials (PPT source, assets, generator scripts, node_modules)
+presentation/
+
 # OS
 Thumbs.db
 .DS_Store
+
+expand/
+shrink/
+animation.html

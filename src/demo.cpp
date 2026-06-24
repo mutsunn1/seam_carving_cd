@@ -52,17 +52,6 @@ cv::Mat visualize_energy_color(const cv::Mat& energy) {
     return color;
 }
 
-// 占位能量图：全 1 矩阵
-cv::Mat placeholder_energy(const cv::Mat& image) {
-    return cv::Mat(image.rows, image.cols, CV_64F, cv::Scalar(1.0));
-}
-
-// 占位 seam：中间列的竖直 seam
-std::vector<int> placeholder_seam(int rows, int cols) {
-    int mid = std::max(0, cols / 2);
-    return std::vector<int>(rows, mid);
-}
-
 // 把整数序号补零到 4 位，用于文件名
 std::string frame_index_str(size_t i) {
     std::string s = std::to_string(i);
@@ -71,66 +60,38 @@ std::string frame_index_str(size_t i) {
 
 } // anonymous namespace
 
-// 缩图动画（占位实现）
-// 真实实现应：每轮计算真实能量图和最小能量 seam，再删除 seam
-// 占位版本使用中间列作为 seam，仅保证动画结构正确、红/绿标记可见
+// 缩图动画：每轮计算真实能量图和最小能量 seam，再删除 seam
 Animation animate_shrink(const cv::Mat& image, int target_width) {
     Animation animation;
     cv::Mat current = image.clone();
     while (current.cols > target_width) {
-        cv::Mat energy = placeholder_energy(current);
-        std::vector<int> seam = placeholder_seam(current.rows, current.cols);
+        cv::Mat energy = compute_energy_map(current);
+        std::vector<int> seam = find_vertical_seam(energy);
         animation.push_back({current.clone(), visualize_energy_color(energy), mark_seam_for_removal(current, seam)});
         current = remove_vertical_seam(current, seam);
     }
-    cv::Mat final_energy = placeholder_energy(current);
+    cv::Mat final_energy = compute_energy_map(current);
     animation.push_back({current.clone(), visualize_energy_color(final_energy), current.clone()});
     return animation;
 }
 
-// 扩图动画（占位实现）
-// 真实实现应：每轮计算真实能量图和最小能量 seam，再插入 seam
-// 占位版本使用中间列作为 seam，仅保证动画结构正确、红/绿标记可见
+// 扩图动画：每轮计算真实能量图和最小能量 seam，再插入 seam
 Animation animate_expand(const cv::Mat& image, int target_width) {
     Animation animation;
     cv::Mat current = image.clone();
-    animation.push_back({current.clone(), visualize_energy_color(placeholder_energy(current)), current.clone()});
+    animation.push_back({current.clone(), visualize_energy_color(compute_energy_map(current)), current.clone()});
     while (current.cols < target_width) {
-        cv::Mat energy = placeholder_energy(current);
-        std::vector<int> seam = placeholder_seam(current.rows, current.cols);
+        cv::Mat energy = compute_energy_map(current);
+        std::vector<int> seam = find_vertical_seam(energy);
         cv::Mat next = insert_vertical_seam(current, seam);
-        cv::Mat next_energy = placeholder_energy(next);
+        cv::Mat next_energy = compute_energy_map(next);
         animation.push_back({next.clone(), visualize_energy_color(next_energy), mark_inserted_seam(next, seam)});
         current = next;
     }
     return animation;
 }
 
-// 保存单个动画的辅助函数，把帧写入指定子目录
-static void save_animation_frames(const Animation& animation, const std::string& output_dir,
-                                  const std::string& subdir) {
-    namespace fs = std::filesystem;
-    fs::path frames_dir = fs::path(output_dir) / subdir;
-    fs::create_directories(frames_dir);
-
-    for (size_t i = 0; i < animation.size(); ++i) {
-        std::string idx = frame_index_str(i);
-        save_image((frames_dir / ("img_" + idx + ".png")).string(), animation[i].image);
-        save_image((frames_dir / ("energy_" + idx + ".png")).string(), animation[i].energy);
-        save_image((frames_dir / ("seam_" + idx + ".png")).string(), animation[i].seam_overlay);
-    }
-}
-
-// 同时保存缩图和扩图动画，并生成带切换按钮的 animation.html
-void save_animations(const Animation& shrink, const Animation& expand, const std::string& output_dir) {
-    namespace fs = std::filesystem;
-    fs::create_directories(output_dir);
-
-    save_animation_frames(shrink, output_dir, "frames/shrink");
-    save_animation_frames(expand, output_dir, "frames/expand");
-
-    std::ofstream html(fs::path(output_dir) / "animation.html");
-    html << "<!DOCTYPE html>\n"
+k
      << "<html lang=\"zh-CN\">\n"
      << "<head>\n"
      << "<meta charset=\"UTF-8\">\n"

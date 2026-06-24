@@ -2,14 +2,12 @@
 
 # 模块契约
 
-所有接口声明在 `src/seam_carving.h` 中。`src/` 中当前是占位代码，完整实现见 `reference/`。
+所有接口声明在 `src/seam_carving.h` 中。`src/` 中当前是占位代码
 
 ## 协作方式
 
 - 每个同学只改自己负责的 `src/*.cpp` 文件。
-- `reference/` 里的同名 `.cpp` 文件是可直接复制到 `src/` 的参考实现。
 - 测试是**契约测试**：只验证接口与基础不变量，占位代码和参考实现都应通过。
-- CI 直接构建 `src/` 中的当前代码，不自动复制 `reference/`。
 - **CI 为每个模块创建独立 job（共 6 个并行 job）**，失败时 job 名称即对应模块，再由下表映射到人。
 
 ## 人员分工
@@ -58,10 +56,10 @@
 
 本地运行：
 
-```cmd
-run_tests.bat Release energy_map   :: 只运行 energy_map 模块
-run_tests.bat Release dp_search    :: 只运行 dp_search 模块
-run_tests.bat Release              :: 运行全量测试
+```powershell
+.\run_tests.bat Release energy_map   # 只运行 energy_map 模块
+.\run_tests.bat Release dp_search    # 只运行 dp_search 模块
+.\run_tests.bat Release              # 运行全量测试
 ```
 
 ## 第一位同学：能量图
@@ -142,8 +140,8 @@ void save_animations(const Animation& shrink, const Animation& expand, const std
 
 ## 完整验证
 
-```cmd
-run_tests.bat                 :: 运行全部测试
-run_tests.bat Release energy_map :: 只运行 energy_map 模块测试
-run_demo.bat data\sample.jpg output --width 120
+```powershell
+.\run_tests.bat                 # 运行全部测试
+.\run_tests.bat Release energy_map # 只运行 energy_map 模块测试
+.\run_demo.bat data\sample.jpg output --width 120
 ```
