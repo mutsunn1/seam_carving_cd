@@ -91,7 +91,31 @@ Animation animate_expand(const cv::Mat& image, int target_width) {
     return animation;
 }
 
-k
+// 保存单个动画的辅助函数，把帧写入指定子目录
+static void save_animation_frames(const Animation& animation, const std::string& output_dir,
+                                  const std::string& subdir) {
+    namespace fs = std::filesystem;
+    fs::path frames_dir = fs::path(output_dir) / subdir;
+    fs::create_directories(frames_dir);
+
+    for (size_t i = 0; i < animation.size(); ++i) {
+        std::string idx = frame_index_str(i);
+        save_image((frames_dir / ("img_" + idx + ".png")).string(), animation[i].image);
+        save_image((frames_dir / ("energy_" + idx + ".png")).string(), animation[i].energy);
+        save_image((frames_dir / ("seam_" + idx + ".png")).string(), animation[i].seam_overlay);
+    }
+}
+
+// 同时保存缩图和扩图动画，并生成带切换按钮的 animation.html
+void save_animations(const Animation& shrink, const Animation& expand, const std::string& output_dir) {
+    namespace fs = std::filesystem;
+    fs::create_directories(output_dir);
+
+    save_animation_frames(shrink, output_dir, "frames/shrink");
+    save_animation_frames(expand, output_dir, "frames/expand");
+
+    std::ofstream html(fs::path(output_dir) / "animation.html");
+    html << "<!DOCTYPE html>\n"
      << "<html lang=\"zh-CN\">\n"
      << "<head>\n"
      << "<meta charset=\"UTF-8\">\n"
